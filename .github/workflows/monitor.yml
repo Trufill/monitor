@@ -1,0 +1,36 @@
+name: monitor
+
+on:
+  schedule:
+    # Раз в 15 минут. Расписание GitHub выполняется с джиттером в минуты — это нормально,
+    # порог свежести снимка точности (50 мин) выбран с этим запасом.
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      drill:
+        description: 'Учебная тревога: открыть issue и закрыть её двумя следующими чистыми прогонами'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  # Два прогона не должны работать одновременно: они читали бы одну и ту же issue и решили бы
+  # одно и то же (два комментария, две правки). Новый прогон ждёт завершения текущего.
+  group: monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Прогон проверок
+        run: node src/main.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MONITOR_DRILL: ${{ github.event.inputs.drill && '1' || '' }}

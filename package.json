@@ -1,0 +1,13 @@
+{
+  "name": "trufill-monitor",
+  "private": true,
+  "description": "Внешний мониторинг Trufill: доступность, витрина точности и управление контрактами на Base",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node src/main.mjs --dry-run"
+  }
+}

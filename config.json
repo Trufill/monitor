@@ -1,0 +1,72 @@
+{
+  "http": {
+    "status": "https://api.trufill.xyz/status",
+    "health": "https://api.trufill.xyz/health",
+    "swap": "https://swap.trufill.xyz/",
+    "swapVersion": "https://swap.trufill.xyz/version.json",
+    "site": "https://trufill.xyz/",
+    "accuracyPage": "https://trufill.xyz/accuracy.html",
+    "accuracySnapshot": "https://trufill.xyz/accuracy-snapshot.json"
+  },
+  "tls": {
+    "hosts": ["api.trufill.xyz", "swap.trufill.xyz", "trufill.xyz"],
+    "minDaysLeft": 14
+  },
+  "accuracy": {
+    "maxAgeMinutes": 50
+  },
+  "base": {
+    "chainId": 8453,
+    "rpcs": [
+      { "url": "https://base-rpc.publicnode.com", "paceMs": 100 },
+      { "url": "https://base.drpc.org", "paceMs": 250 },
+      { "url": "https://mainnet.base.org", "paceMs": 1100 }
+    ],
+    "maxBlockLagSeconds": 180,
+    "logWindowBlocks": 7200,
+    "logChunkBlocks": 1800,
+    "contracts": {
+      "router": "0x877A4Bb039c8146cfB8daAe36CfB5AE1e9BD1060",
+      "feeSwitch": "0x802F0CA0F62bD66c2117B4392d8350578E442cdc",
+      "timelock": "0x9a8F32F16FB9d99Ba26EE957d5Ca53798Ebf256C",
+      "safe": "0x7999EF46136a40A6769B1c2226510426689c22E7"
+    },
+    "expected": {
+      "code": {
+        "router": "f243c980877c4ac134576ee422b49fdad2642ba624b4549b218e20244be14cec",
+        "feeSwitch": "5e83b8f95a71c7d35e12f80b4d2e389f67a4ba3e577d4afbc3acd88693a39d65",
+        "timelock": "83e9b60f5e3c1d074c2e4613c0662b9fb9e2c9084ac452ee21799777a5cc59a7",
+        "safe": "a8a0fbd3cdf49e751346664e01b529a58322a814cf8df8d85deb20e63bd6415e"
+      },
+      "router": {
+        "feeSwitch": "0x802F0CA0F62bD66c2117B4392d8350578E442cdc",
+        "swapRouter": "0x2626664c2603336E57B271c5C0b26F421741e481"
+      },
+      "feeSwitch": {
+        "owner": "0x9a8F32F16FB9d99Ba26EE957d5Ca53798Ebf256C",
+        "pendingOwner": "0x0000000000000000000000000000000000000000",
+        "feeBps": 0,
+        "feeCollector": "0x7999EF46136a40A6769B1c2226510426689c22E7"
+      },
+      "timelock": {
+        "owner": "0x7999EF46136a40A6769B1c2226510426689c22E7",
+        "pendingOwner": "0x0000000000000000000000000000000000000000",
+        "feeSwitch": "0x802F0CA0F62bD66c2117B4392d8350578E442cdc"
+      },
+      "safe": {
+        "owners": ["0xda37f17CFB086B9f4c730AeB7A205b04186A66A5"],
+        "threshold": 1,
+        "nonce": 1,
+        "modules": [],
+        "guard": "0x0000000000000000000000000000000000000000",
+        "fallbackHandler": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
+        "singleton": "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762"
+      }
+    }
+  },
+  "alert": {
+    "label": "monitor-alert",
+    "assignee": "artemmalanin979-create",
+    "closeAfterOkRuns": 2
+  }
+}

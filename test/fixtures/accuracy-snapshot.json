@@ -1,0 +1,121 @@
+{
+  "generatedAt": "2026-09-29T09:05:24.347Z",
+  "journal": {
+    "segments": [
+      {
+        "name": "quotes.jsonl",
+        "bytes": 53266,
+        "sha256": "bd9dcd7f06ad9114db7a36639360e940e50d0dcb46cda9f9b56eb6958fd6210b"
+      }
+    ],
+    "sha256": "bd9dcd7f06ad9114db7a36639360e940e50d0dcb46cda9f9b56eb6958fd6210b",
+    "recipe": "cat quotes.jsonl | sha256sum"
+  },
+  "fromSeq": 1,
+  "excluded": {
+    "lines": 0,
+    "seqFrom": null,
+    "seqTo": null,
+    "quotes": 0,
+    "transactions": 0,
+    "reports": 0,
+    "trades": 0,
+    "thresholdViolations": 0,
+    "promiseShortfalls": 0
+  },
+  "dataState": "has-data",
+  "summary": {
+    "dataState": "has-data",
+    "attempts": 82,
+    "refusals": {
+      "noRoute": 13,
+      "sourcesUnavailable": 0
+    },
+    "trades": 2,
+    "unexecuted": 8,
+    "thresholdViolations": 0,
+    "promiseShortfalls": 0,
+    "violationUpperBoundBps": "15000",
+    "coverage": {
+      "backed": 2,
+      "unbacked": 0,
+      "outageMarked": 0,
+      "disputedQuotes": 0
+    },
+    "consideredCountHistogram": {
+      "3": 1,
+      "4": 1
+    },
+    "deltaBps": [
+      "0",
+      "0"
+    ]
+  },
+  "trades": [
+    {
+      "quoteId": "01M25F62T2K1RVD64JGANZB6JV",
+      "chainId": 84532,
+      "txHash": "0x0f0f8a5c1c0ddf92cb5999cd6c53cbef390907f0c7f01fdc1b32325fb7b172e2",
+      "promised": "48879890",
+      "threshold": "48391092",
+      "actual": "48879890",
+      "deltaBps": "0",
+      "thresholdKept": true,
+      "promiseKept": true,
+      "link": "client-asserted",
+      "blockNumber": "46634647",
+      "logIndex": 111
+    },
+    {
+      "quoteId": "01M3MXPNV8JMKJ3V6E8QFC0PQ0",
+      "chainId": 8453,
+      "txHash": "0xc20cf7c51ead32ce7602fd33670c48d36287e37b8ab481972f50b5404f09ca8d",
+      "promised": "268541",
+      "threshold": "268541",
+      "actual": "268543",
+      "deltaBps": "0",
+      "thresholdKept": true,
+      "promiseKept": true,
+      "link": "client-asserted",
+      "blockNumber": "51920270",
+      "logIndex": 746
+    }
+  ],
+  "outages": {
+    "windows": [],
+    "swapsMarked": 0,
+    "markedMs": 0,
+    "periodFromIso": "2026-09-09T15:36:43.040Z",
+    "periodToIso": "2026-09-28T21:11:27.744Z",
+    "periodMs": 1661684704,
+    "markedSharePpm": 0,
+    "probeCoverage": {
+      "cadenceMs": 300000,
+      "spanMs": 1661684704,
+      "expected": 5539,
+      "observed": 5199,
+      "maxGapMs": 97362128,
+      "gapFromIso": "2026-09-09T15:36:43.040Z",
+      "gapToIso": "2026-09-10T18:39:25.168Z"
+    }
+  },
+  "execheck": {
+    "verdicts": 2,
+    "undeterminedAttributions": 1
+  },
+  "caveats": [
+    "связь котировки и транзакции заявлена клиентом: в цепи нет quoteId. Надзорный трек (execheck) умеет проверить её разбором calldata — результат этой проверки отдельный артефакт, в этот снимок не входящий",
+    "журнал внутренне непротиворечив — это не «история доказана»: голова цепочки снаружи не закреплена",
+    "меряется обещанное против полученного — мы против себя, а не наша цена против других агрегаторов",
+    "индекс читает только финализированные блоки: история отстаёт на 13–30 минут в зависимости от сети (замерено 2026-09-10, 23 замера)",
+    "замену транзакции кошельком мы распознаём и корректируем запись; неоднозначные случаи считаются отдельной графой, а не относятся к одной из сторон",
+    "«своп без записи» — цепь показывает обмен, а журнал молчит; «запись без свопа» — журнал показывает намерение, а цепь молчит. Это разные вещи, и складывать их нельзя",
+    "окна простоя журнала сняты по пробам, записанным в момент наблюдения; каждое окно напечатано целиком — границы, длительность и число снятых им свопов",
+    "проба — заявление шлюза, зафиксированное в момент наблюдения; истинность заявления она не проверяет. Рядом напечатано покрытие периода пробами: период, который никто не наблюдал, не прощает ничего и ни о чём не свидетельствует",
+    "у 1 из 2 вердиктов execheck атрибуция не определена — пересчёта обещанного по состоянию пула до сделки нет: чьё отклонение цены, наше или рыночное, не установлено"
+  ],
+  "errata": [],
+  "editionsPublished": true,
+  "snapshotSha256Recipe": "sed -e 's/\"snapshotSha256\": \"[0-9a-f]\\{64\\}\"/\"snapshotSha256\": \"0000000000000000000000000000000000000000000000000000000000000000\"/' -e 's/\"generatedAt\": \"[0-9:.TZ-]\\{24\\}\"/\"generatedAt\": \"0000-00-00T00:00:00.000Z\"/' accuracy-snapshot.json | sha256sum",
+  "snapshotSha256": "459c43c0554d610f5ebddd0399ec796e16c7661970ec9105bce9dcacaba2ced2"
+}

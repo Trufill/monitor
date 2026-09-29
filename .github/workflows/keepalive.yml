@@ -1,0 +1,22 @@
+name: keepalive
+
+on:
+  schedule:
+    # Первое число месяца, 04:17 UTC. GitHub гасит расписания репозитория после 60 дней
+    # без коммитов — пустой коммит раз в месяц держит монитор живым.
+    - cron: '17 4 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: |
+          git config user.name "trufill-monitor[bot]"
+          git config user.email "trufill-monitor[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "keepalive: держать расписание активным"
+          git push
