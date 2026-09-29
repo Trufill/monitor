@@ -33,4 +33,6 @@ jobs:
         run: node src/main.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MONITOR_DRILL: ${{ github.event.inputs.drill && '1' || '' }}
+          # Строгое сравнение: у workflow_dispatch значение приходит строкой,
+          # и строка 'false' истинна — drill включался бы на каждом ручном прогоне.
+          MONITOR_DRILL: ${{ github.event.inputs.drill == true && '1' || '' }}
