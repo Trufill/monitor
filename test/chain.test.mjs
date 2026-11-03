@@ -180,3 +180,11 @@ test('события к тревоге: расшифровка Queued и пер�
   assert.match(detail, /timelock\.Queued \(id=0xabababababababab…, newFeeBps=30, readyAt=2025-10-01T10:00:00\.000Z\)/)
   assert.doesNotMatch(detail, /SafeReceived|0x3d0ce9bf/)
 })
+
+test('Polygon governance uses its own network and alert namespace', async () => {
+  const cfg=config()
+  cfg.polygon={...cfg.base,chainId:137,name:'Polygon PoS'}
+  const results=await checkChain(cfg,{chainKey:'polygon',now:()=>NOW,makeRpc:entry=>fakeNode(new URL(entry.url).host,chainState(),{chainId:137})})
+  assert.equal(results.length,6)
+  assert(results.every(r=>r.id.startsWith('polygon.')&&r.ok),JSON.stringify(results))
+})

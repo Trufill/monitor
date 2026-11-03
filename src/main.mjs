@@ -26,6 +26,12 @@ export const TITLES = {
   'base.feeSwitch': 'FeeSwitch',
   'base.timelock': 'Таймлок',
   'base.safe': 'Safe',
+  'polygon.rpc': 'Узлы Polygon PoS',
+  'polygon.code': 'Polygon: код контрактов',
+  'polygon.router': 'Polygon: связка роутера',
+  'polygon.feeSwitch': 'Polygon: FeeSwitch',
+  'polygon.timelock': 'Polygon: таймлок',
+  'polygon.safe': 'Polygon: Safe',
   drill: 'Учебная тревога',
 }
 
@@ -68,7 +74,7 @@ export async function runChecks(cfg, io = {}) {
   } = io
   const http = cfg.http
   const tasks = {
-    'api.status': async () => evaluateStatus(await get(http.status), { baseChainId: cfg.base.chainId }),
+    'api.status': async () => evaluateStatus(await get(http.status), { baseChainId: cfg.base.chainId, requiredChains: ['base', 'polygon'].filter((key) => cfg[key]).map((key) => ({ id: cfg[key].chainId, name: cfg[key].name ?? 'Base' })) }),
     'api.health': async () => evaluateHealth(await get(http.health)),
     'swap.app': async () => {
       const [page, version] = await Promise.all([get(http.swap), get(http.swapVersion)])
@@ -99,12 +105,14 @@ export async function runChecks(cfg, io = {}) {
     },
   }
   const web = Object.entries(tasks).map(async ([id, run]) => ({ id, ...(await retry(run)) }))
-  const chain = checkChain(cfg, { makeRpc: rpcFactory, now }).catch((err) => [
-    { id: 'base.rpc', ok: false, detail: `проверка цепи упала: ${describeError(err)}`, info: '' },
-  ])
+  const chain = Promise.all(['base', 'polygon'].filter((key) => cfg[key]).map((chainKey) =>
+    checkChain(cfg, { makeRpc: rpcFactory, now, chainKey }).catch((err) => [
+      { id: `${chainKey}.rpc`, ok: false, detail: `проверка цепи упала: ${describeError(err)}`, info: '' },
+    ]),
+  )).then((rows) => rows.flat())
   const hints = hintsFor(cfg)
   const results = (await Promise.all([...web, chain])).flat()
-  return results.map((r) => ({ ...r, title: TITLES[r.id] ?? r.id, hint: hints[r.id] }))
+  return results.map((r) => ({ ...r, title: TITLES[r.id] ?? (r.id.startsWith('polygon.') ? `Polygon: ${TITLES[r.id.replace('polygon.', 'base.')] ?? r.id}` : r.id), hint: hints[r.id] ?? (r.id.startsWith('polygon.') ? 'Polygon PoS: сверить config.json → polygon.expected, Safe и timelock в Polygonscan. Не изменять эталон до объяснения расхождения.' : undefined) }))
 }
 
 export function drillResult(cfg) {

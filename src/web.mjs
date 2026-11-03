@@ -28,7 +28,7 @@ export function formatDuration(seconds) {
  * роутера не `ok`), журнал котировок не пишется (`off` в проде — тоже сбой: котировки без записи
  * ровно то, что `/status` обязан показывать), или общий `down`. Тестнеты — только в сведения.
  */
-export function evaluateStatus({ status, text }, { baseChainId }) {
+export function evaluateStatus({ status, text }, { baseChainId, requiredChains = [{ id: baseChainId, name: 'Base' }] }) {
   const { json } = parseJson(text)
   if (!json) return verdict([`HTTP ${status}, ответ не JSON`])
   // 503 с документом статуса — это `down` с подробностями; ответ без `chains` и `journal` — не
@@ -46,17 +46,19 @@ export function evaluateStatus({ status, text }, { baseChainId }) {
     problems.push(`журнал котировок: ${journal?.status ?? 'нет поля'}${why ? ` (${why})` : ''}`)
   }
   const lines = Array.isArray(json.chains?.lines) ? json.chains.lines : []
-  const baseLine = lines.find((line) => line.id === baseChainId)
-  if (!baseLine) problems.push(`нет строки Base ${baseChainId}`)
-  else if (baseLine.rpc !== 'ok' || baseLine.routerWiring !== 'ok') {
-    problems.push(`Base: rpc=${baseLine.rpc}, routerWiring=${baseLine.routerWiring}${baseLine.detail ? `, ${redactUrls(baseLine.detail)}` : ''}`)
+  for (const chain of requiredChains) {
+    const line = lines.find((entry) => entry.id === chain.id)
+    if (!line) problems.push(`нет строки ${chain.name} ${chain.id}`)
+    else if (line.rpc !== 'ok' || line.routerWiring !== 'ok') {
+      problems.push(`${chain.name}: rpc=${line.rpc}, routerWiring=${line.routerWiring}${line.detail ? `, ${redactUrls(line.detail)}` : ''}`)
+    }
   }
   const version = json.version
   const info = [
     `шлюз ${version?.sha ? version.sha.slice(0, 7) : '?'}${version?.dirty ? ' (собран из грязного дерева)' : ''}`,
     typeof json.uptimeSeconds === 'number' ? `аптайм ${formatDuration(json.uptimeSeconds)}` : null,
     ...lines
-      .filter((line) => line.id !== baseChainId && (line.rpc !== 'ok' || line.routerWiring !== 'ok'))
+      .filter((line) => !requiredChains.some((chain) => chain.id === line.id) && (line.rpc !== 'ok' || line.routerWiring !== 'ok'))
       .map((line) => `тестнет ${line.id}: rpc=${line.rpc}, routerWiring=${line.routerWiring}`),
   ]
   return verdict(problems, info)

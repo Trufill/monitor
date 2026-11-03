@@ -158,8 +158,9 @@ export async function recentGovernanceEvents(rpc, contracts, toBlock, { windowBl
  * пометкой «не подтверждено»: молчать об изменении управления из-за одного лежащего узла дороже,
  * чем один лишний сигнал.
  */
-export async function checkChain(cfg, { makeRpc, now = () => new Date() }) {
-  const base = cfg.base
+export async function checkChain(cfg, { makeRpc, now = () => new Date(), chainKey = 'base' }) {
+  const base = cfg[chainKey]
+  const chainName = base.name ?? (chainKey === 'base' ? 'Base' : chainKey)
   const results = []
   const usable = []
   const rejected = []
@@ -191,9 +192,9 @@ export async function checkChain(cfg, { makeRpc, now = () => new Date() }) {
     ...readErrors.map((e) => `чтение не удалось: ${e}`),
   ].filter(Boolean)
   results.push({
-    id: 'base.rpc',
+    id: `${chainKey}.rpc`,
     ok: primary !== null,
-    detail: primary ? '' : 'ни один узел Base не дал прочитать управление — проверки цепи слепы',
+    detail: primary ? '' : `ни один узел ${chainName} не дал прочитать управление — проверки цепи слепы`,
     info: rpcInfo.join('; '),
   })
   if (!primary) return results
@@ -235,12 +236,12 @@ export async function checkChain(cfg, { makeRpc, now = () => new Date() }) {
   for (const group of GOVERNANCE_GROUPS) {
     const found = diffs[group]
     if (!found) {
-      results.push({ id: `base.${group}`, ok: true, detail: '', info: summarize(group, actual, base.contracts) })
+      results.push({ id: `${chainKey}.${group}`, ok: true, detail: '', info: summarize(group, actual, base.contracts) })
       continue
     }
     if (confirm && !confirm.diffs[group]) {
       results.push({
-        id: `base.${group}`,
+        id: `${chainKey}.${group}`,
         ok: true,
         detail: '',
         info: `${primary.rpc.host} показал расхождение (${found.join('; ')}), ${confirm.host} — нет: сбой узла, не тревога`,
@@ -253,7 +254,7 @@ export async function checkChain(cfg, { makeRpc, now = () => new Date() }) {
       : events.length
         ? ` События управления за последние ${base.logWindowBlocks} блоков (до ${MAX_EVENTS} последних): ${events.slice(-MAX_EVENTS).join(' | ')}`
         : ` Событий управления за последние ${base.logWindowBlocks} блоков нет.`
-    results.push({ id: `base.${group}`, ok: false, detail: `${found.join('; ')} (${note}).${eventsNote}`, info: '' })
+    results.push({ id: `${chainKey}.${group}`, ok: false, detail: `${found.join('; ')} (${note}).${eventsNote}`, info: '' })
   }
   return results
 }

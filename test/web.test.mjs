@@ -177,3 +177,19 @@ test('сертификат: меньше порога дней — тревог�
   assert.equal(evaluateCertificate('a', { validTo: new Date('2026-12-07T00:00:00Z'), issuer: 'LE' }, opts2).problem, null)
   assert.match(evaluateCertificate('a', { validTo: new Date('2026-10-05T00:00:00Z'), issuer: 'LE' }, opts2).problem, /истекает через 6 дн/)
 })
+
+test('required Polygon outage is an alert, not testnet information', () => {
+  const doc=structuredClone(STATUS)
+  doc.chains.lines.push({id:137,rpc:'fail',routerWiring:'ok'})
+  const v=evaluateStatus({status:200,text:JSON.stringify(doc)}, {baseChainId:8453,requiredChains:[{id:8453,name:'Base'},{id:137,name:'Polygon PoS'}]})
+  assert.equal(v.ok,false)
+  assert.match(v.detail,/Polygon PoS: rpc=fail/)
+})
+
+test('required Polygon missing or mismatched wiring is an alert', () => {
+  const options={baseChainId:8453,requiredChains:[{id:8453,name:'Base'},{id:137,name:'Polygon PoS'}]}
+  assert.equal(evaluateStatus({status:200,text:JSON.stringify(STATUS)},options).ok,false)
+  const doc=structuredClone(STATUS)
+  doc.chains.lines.push({id:137,rpc:'ok',routerWiring:'mismatch'})
+  assert.match(evaluateStatus({status:200,text:JSON.stringify(doc)},options).detail,/Polygon PoS: rpc=ok, routerWiring=mismatch/)
+})

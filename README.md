@@ -1,7 +1,7 @@
 # monitor — внешний мониторинг Trufill
 
 Независимая проверка продакшна **извне собственной инфраструктуры**: прогон GitHub Actions
-каждые 15 минут смотрит на Trufill так же, как его видит внешний мир, и на контракты в Base
+каждые 15 минут смотрит на Trufill так же, как его видит внешний мир, и на контракты в Base и Polygon
 mainnet — так же, как их видит любой держатель узла. Сбой превращается в issue в этом
 репозитории с назначением на владельца (почта + приложение GitHub), восстановление закрывает
 её само.
@@ -16,20 +16,20 @@ mainnet — так же, как их видит любой держатель у
 
 | Проверка | Что именно |
 |---|---|
-| `api.status` | `/status` шлюза: HTTP 200, общий статус не `down`, журнал котировок `ok`, строка Base: `rpc=ok` и `routerWiring=ok` (иначе котировки Base не выдаются). Тестнеты — только в сведения. |
+| `api.status` | `/status` шлюза: HTTP 200, общий статус не `down`, журнал котировок `ok`, строки Base и Polygon: `rpc=ok` и `routerWiring=ok` (иначе котировки Base не выдаются). Тестнеты — только в сведения. |
 | `api.health` | `/health`: HTTP 200. 503 = `down`. |
 | `swap.app` | Терминал: `index.html` отдаётся, его бандл совпадает с `version.json` и скачивается. |
 | `site.pages` | Главная и `accuracy.html`: 200, HTML, в заголовке Trufill. |
 | `accuracy.snapshot` | Снимок точности: свежий (< 50 мин, таймер пишет каждые 15), хеш по опубликованному рецепту `snapshotSha256Recipe` совпадает, нарушений порога нет. |
 | `tls` | Сертификаты трёх хостов: до конца больше 14 дней. |
 
-**Управление на цепи (Base mainnet, читается через публичные узлы):**
+**Управление на цепи (Base и Polygon mainnet, читается через публичные узлы):**
 
 Код четырёх контрактов (sha256), связка роутера (`feeSwitch`, `swapRouter`), FeeSwitch
 (комиссия 0 bps, получатель = Safe, владелец = таймлок), таймлок (владелец = Safe, привязка),
 Safe (владельцы, порог, nonce, модули, guard, fallback-обработчик, singleton).
 
-Эталон — `config.json` → `base.expected`. Любое расхождение — тревога с расшифровкой
+Эталон — `config.json` → `base.expected` и `polygon.expected`. Polygon имеет отдельный Safe и отдельные `polygon.*` тревоги; его отсутствие в `/status` — сбой. Любое расхождение — тревога с расшифровкой
 событий управления за последние ~4 часа. Постановка в очередь таймлока невозможна без
 транзакции Safe, а та сдвигает `nonce`, поэтому состояние ловит всё, что ловили бы события.
 
@@ -83,3 +83,7 @@ node src/main.mjs --dry-run --no-retry # диагностика: сбой вид
   нужен другой контур.
 - Монитор не мерит латентность и не проверяет котировки по смыслу — только живость,
   целостность и управление.
+
+## Polygon activation, 3 November 2026
+
+Polygon uses chain137, Safe `0xB825deFa656F5F36Db560372338e267CcA304d14`, threshold1/1 and nonce1. Code hashes and governance were read from Polygon and compared with the frozen deployment proof. The router address happens to match Base; chain identity and the Polygon SwapRouter02 binding are checked independently. The status check requires both mainnets. No wallet secrets are stored.
